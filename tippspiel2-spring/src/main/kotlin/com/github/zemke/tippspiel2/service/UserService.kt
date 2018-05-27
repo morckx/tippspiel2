@@ -76,4 +76,10 @@ class UserService(
     fun findAllUsers(): List<User> {
         return userRepository.findAll()
     }
+
+    fun updateUser(updatedUser: User, newPlainPassword: String?): User {
+        if (newPlainPassword != null)
+            updatedUser.password = BCrypt.hashpw(newPlainPassword, authenticationProperties.bcryptSalt)
+        return userRepository.save(updatedUser)
+    }
 }

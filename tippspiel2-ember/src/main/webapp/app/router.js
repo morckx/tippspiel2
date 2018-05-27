@@ -26,6 +26,7 @@ Router.map(function() {
 
   this.route('users', function() {
     this.route('bets', {path: '/:user_id/bets'});
+    this.route('edit');
   });
 
   this.route('fixtures', function() {

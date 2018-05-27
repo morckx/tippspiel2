@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -25,7 +26,7 @@ class UserRestController(
 
     @PostMapping("")
     fun createUser(@RequestBody userCreationDto: UserCreationDto): ResponseEntity<UserDto> {
-        val plainPassword = userCreationDto.password
+        val plainPassword = userCreationDto.password!!
         val bettingGame = bettingGameService.find(userCreationDto.bettingGames[0])
                 .orElseThrow { throw BadRequestException("Invalid betting game.", "err.bettingGameNotFound") }
         val persistedUser = userService.addUser(
@@ -37,6 +38,17 @@ class UserRestController(
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(UserDto.toDto(persistedUser, token))
+    }
+
+    @PutMapping("/{userId}")
+    fun createUser(@PathVariable userId: Long, @RequestBody userCreationDto: UserCreationDto): ResponseEntity<UserDto> {
+        val user = userService.findUser(userId).orElseThrow { throw NotFoundException("No such user", "err.userNotFound") }
+
+        user.fullName.firstName = userCreationDto.firstName
+        user.fullName.lastName = userCreationDto.lastName
+        user.email = userCreationDto.email
+
+        return ResponseEntity.ok(UserDto.toDto(userService.updateUser(user, userCreationDto.password)))
     }
 
     @GetMapping("/{id}")
